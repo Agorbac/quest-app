@@ -1,0 +1,15 @@
+<h1>Вход в систему</h1>
+
+<%= form_with url: login_path, data: { turbo: false } do |f| %>
+  <div>
+    <%= f.label :email, "Ваш Email:" %><br>
+    <%= f.email_field :email %>
+  </div>
+  <br>
+  <div>
+    <%= f.label :password, "Пароль:" %><br>
+    <%= f.password_field :password %>
+  </div>
+  <br>
+  <%= f.submit "Войти" %>
+<% end %>

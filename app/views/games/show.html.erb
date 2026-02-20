@@ -1,0 +1,14 @@
+<h1>Детали игры</h1>
+
+<p><strong>Информация:</strong> <%= @game.info %></p>
+<p><strong>Время:</strong> <%= @game.time %></p>
+
+<p><strong>Квест:</strong> <%= @game.quest.info %></p> 
+
+<hr>
+
+<%= link_to "Редактировать", edit_game_path(@game) %> |
+<%= link_to "Удалить игру", game_path(@game), 
+            data: { turbo_method: :delete, turbo_confirm: "Точно удалить?" }, 
+            style: "color: red;" %> | 
+<%= link_to "Назад ко всем играм", games_path %>

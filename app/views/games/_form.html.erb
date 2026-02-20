@@ -1,0 +1,33 @@
+<%= form_with model: game do |form| %>
+  <% if game.errors.any? %>
+    <div style="color: red;">
+      <% game.errors.full_messages.each do |message| %>
+        <p><%= message %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 15px;">
+    <strong>Выберите квест:</strong><br>
+    <%= form.collection_radio_buttons :quest_id, Quest.all, :id, :name do |b| %>
+      <div style="margin-top: 5px;">
+        <%= b.radio_button %>
+        <%= b.label %>
+      </div>
+    <% end %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :time, "Время:" %><br>
+    <%= form.datetime_field :time %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :info, "Дополнительная информация:" %><br>
+    <%= form.text_area :info, rows: 4, style: "width: 100%; max-width: 400px;" %>
+  </div>
+
+  <div>
+    <%= form.submit "Забронировать", style: "padding: 5px 15px; font-weight: bold;" %>
+  </div>
+<% end %>

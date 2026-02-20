@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "QuestApp" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="QuestApp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+  </head>
+
+  <body>
+    <nav style="padding: 10px; background: #eee; margin-bottom: 20px;">
+      <b>QuestApp</b> | 
+      
+      <% if logged_in? %>
+        Привет, <%= current_user.name %>! |
+        <%= button_to "Выйти", logout_path, method: :delete, style: "display:inline-block;" %>
+      <% else %>
+        <%= link_to "Вход", login_path %> | 
+        <%= link_to "Регистрация", signup_path %>
+      <% end %>
+    </nav>
+
+    <% if notice %>
+      <div style="color: green; padding: 10px;"><%= notice %></div>
+    <% end %>
+    
+    <% if alert %>
+      <div style="color: red; padding: 10px;"><%= alert %></div>
+    <% end %>
+
+    <div style="padding: 10px;">
+      <%= yield %>
+    </div>
+  </body>
+</html>

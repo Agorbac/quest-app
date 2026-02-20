@@ -1,0 +1,5 @@
+<h1>Редактирование игры</h1>
+<%= render "form", game: @game %>
+<br>
+<%= link_to "Отмена", game_path(@game) %> | 
+<%= link_to "К списку", games_path %>

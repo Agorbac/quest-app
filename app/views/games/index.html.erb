@@ -1,0 +1,15 @@
+<h1>Мои игры</h1>
+
+<ul>
+  <% @games.each do |game| %>
+    <li style="margin-bottom: 10px;">
+      <strong><%= game.quest.name %></strong> 
+      (<%= game.time ? game.time.strftime("%d.%m.%Y в %H:%M") : "Время не указано" %>) — 
+      
+      <%= link_to "Подробнее", game_path(game) %>
+    </li>
+  <% end %>
+</ul>
+
+<br>
+<%= link_to "Забронировать новую игру", new_game_path, style: "background: green; color: white; padding: 8px 12px; text-decoration: none; border-radius: 4px; display: inline-block;" %>
