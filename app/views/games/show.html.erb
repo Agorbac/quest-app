@@ -8,7 +8,8 @@
 <hr>
 
 <%= link_to "Редактировать", edit_game_path(@game) %> |
-<%= link_to "Удалить игру", game_path(@game), 
-            data: { turbo_method: :delete, turbo_confirm: "Точно удалить?" }, 
-            style: "color: red;" %> | 
+<%= button_to "Удалить игру", game_path(@game), 
+              method: :delete, 
+              form: { data: { turbo_confirm: "Точно удалить?" } }, 
+              style: "color: red; background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; display: inline-block;" %>| 
 <%= link_to "Назад ко всем играм", games_path %>
