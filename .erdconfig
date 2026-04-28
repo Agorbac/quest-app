@@ -8,5 +8,5 @@ exclude:
   - "SolidCache::*"
   - "SolidCable::*"
   - "ActionText::*"
-  - "ActiveStorage::*"
   - "ActionMailbox::*"
+  - "ActiveStorage::*"

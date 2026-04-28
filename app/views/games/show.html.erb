@@ -1,15 +1,11 @@
 <h1>Детали игры</h1>
 
-<p><strong>Информация:</strong> <%= @game.info %></p>
-<p><strong>Время:</strong> <%= @game.time %></p>
-
-<p><strong>Квест:</strong> <%= @game.quest.info %></p> 
+<p><strong>Номер квеста:</strong> Квест <%= @game.quest_id %></p> 
+<p><strong>Время игры:</strong> <%= @game.time.strftime("%d.%m.%Y в %H:%M") %></p>
+<p><strong>Дополнительная информация:</strong> <%= @game.info.present? ? @game.info : "Нет информации" %></p>
 
 <hr>
 
 <%= link_to "Редактировать", edit_game_path(@game) %> |
-<%= button_to "Удалить игру", game_path(@game), 
-              method: :delete, 
-              form: { data: { turbo_confirm: "Точно удалить?" } }, 
-              style: "color: red; background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; display: inline-block;" %>| 
-<%= link_to "Назад ко всем играм", games_path %>
+<%= button_to "Удалить игру", game_path(@game), method: :delete, form: { data: { turbo_confirm: "Точно удалить?" } }, style: "color: red; background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; display: inline-block;" %> | 
+<%= link_to "Назад в личный кабинет", dashboard_path %>

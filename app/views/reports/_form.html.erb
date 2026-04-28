@@ -1,0 +1,161 @@
+<%= form_with model: @report, url: game_report_path(@game), local: true, html: { multipart: true } do |f| %>
+  <div style="margin-bottom: 15px;">
+    <%= f.label :blank_photo, "Фото бланка", style: "display:block; font-weight:bold;" %>
+    <%= f.file_field :blank_photo, accept: "image/*" %>
+  </div>
+
+  <div style="background: #f8f9fa; padding: 15px; border: 1px solid #ccc; margin-bottom: 20px; border-radius: 5px;">
+    <p style="margin: 0 0 5px 0;"><strong>Квест:</strong> Квест <%= @game.quest_id %></p>
+    <p style="margin: 0;"><strong>Время проведения:</strong> <%= @game.time.strftime("%d.%m.%Y в %H:%M") %></p>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= f.label :source_type, "Откуда игра", style: "display:block;" %>
+    <%= f.select :source_type, [["МК", "mk"], ["БК", "bk"]], { prompt: "Выберите..." }, id: "source_type_select", style: "width: 100%; padding: 8px;" %>
+  </div>
+
+  <div id="mk_sources" style="display: none; margin-bottom: 15px;">
+    <%= f.label :source_name, "Площадка МК", style: "display:block;" %>
+    <%= f.select :source_name, ["Мир Квестов", "Топ Квестов", "Квест Хантер", "Яндекс Афиша", "Не знаю"], { prompt: "Выберите..." }, style: "width: 100%; padding: 8px;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <p style="margin-bottom: 5px;"><strong>Актер по расписанию:</strong> <%= current_user.name %></p>
+    <button type="button" id="btn_replace_actor" style="padding: 5px 10px;">Была замена</button>
+    <div id="replace_actor_block" style="display: none; margin-top: 10px;">
+      <%= f.label :actual_actor_id, "Кто проводил?", style: "display:block;" %>
+      <%= f.collection_select :actual_actor_id, @actors, :id, :name, { prompt: "Выберите..." }, style: "width: 100%; padding: 8px;" %>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= f.label :payment_method, "Способ оплаты", style: "display:block;" %>
+    <%= f.select :payment_method, ["Терминал", "Наличные"], { prompt: "Выберите..." }, style: "width: 100%; padding: 8px;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= f.label :players_count, "Количество человек", style: "display:block;" %>
+    <%= f.number_field :players_count, id: "players_count", min: 1, style: "width: 100%; padding: 8px;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= f.label :discount_type, "Скидка", style: "display:block;" %>
+    <%= f.select :discount_type, [["Нет", "0"], ["500 руб", "500"], ["1000 руб", "1000"], ["Другое", "other"]], { prompt: "Выберите..." }, id: "discount_type", style: "width: 100%; padding: 8px;" %>
+  </div>
+
+  <div id="custom_discount_block" style="display: none; margin-bottom: 15px;">
+    <%= f.label :discount_custom, "Своя скидка (руб)", style: "display:block;" %>
+    <%= f.number_field :discount_custom, id: "discount_custom", min: 0, style: "width: 100%; padding: 8px;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= f.label :photo_sold, style: "display:flex; align-items:center; gap:10px;" do %>
+      <%= f.check_box :photo_sold, id: "photo_sold" %> Было продано фото?
+    <% end %>
+  </div>
+
+  <div id="photo_payment_block" style="display: none; margin-bottom: 15px;">
+    <%= f.label :photo_payment, "Способ оплаты фото", style: "display:block;" %>
+    <%= f.select :photo_payment, ["Терминал", "Наличные"], { prompt: "Выберите..." }, style: "width: 100%; padding: 8px;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= f.label :extra_expenses, "Доп расходы (руб)", style: "display:block;" %>
+    <%= f.number_field :extra_expenses, min: 0, style: "width: 100%; padding: 8px;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= f.label :comment, "Комментарий к игре", style: "display:block;" %>
+    <%= f.text_area :comment, rows: 4, style: "width: 100%; padding: 8px;" %>
+  </div>
+
+  <hr style="margin: 20px 0;">
+
+  <div style="margin-bottom: 15px; padding: 15px; background: #e2e3e5; border-radius: 5px;">
+    <button type="button" id="calc_btn" data-base-price="<%= @base_price %>" style="background: #6c757d; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">Рассчитать итоговую сумму</button>
+    <p style="font-size: 18px; margin-top: 15px; font-weight: bold;">Расчетная сумма: <span id="display_calc_amount"><%= @report.calculated_amount || 0 %></span> руб.</p>
+    <%= f.hidden_field :calculated_amount, id: "calculated_amount" %>
+  </div>
+
+  <div id="confirmation_block" style="display: none; margin-bottom: 15px; padding: 15px; border: 2px solid #28a745; border-radius: 5px;">
+    <p style="font-weight: bold; margin-top: 0;">Сумма совпадает с реальной?</p>
+    <div style="display: flex; gap: 10px;">
+      <button type="button" id="btn_match_yes" style="padding: 8px 20px; background: #28a745; color: white; border: none; border-radius: 3px;">Да</button>
+      <button type="button" id="btn_match_no" style="padding: 8px 20px; background: #dc3545; color: white; border: none; border-radius: 3px;">Нет</button>
+    </div>
+  </div>
+
+  <div id="mismatch_block" style="display: none; margin-bottom: 15px; padding: 15px; border: 2px solid #dc3545; border-radius: 5px;">
+    <%= f.label :actual_amount, "Фактическая сумма", style: "display:block;" %>
+    <%= f.number_field :actual_amount, id: "actual_amount", style: "width: 100%; padding: 8px; margin-bottom: 10px;" %>
+    
+    <%= f.label :amount_mismatch_reason, "Почему сумма другая?", style: "display:block;" %>
+    <%= f.text_area :amount_mismatch_reason, rows: 3, style: "width: 100%; padding: 8px;" %>
+  </div>
+
+  <div id="submit_block" style="display: none; margin-top: 20px;">
+    <%= f.submit "Подтвердить и сохранить", style: "background: #007bff; color: white; padding: 12px 25px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; width: 100%;" %>
+  </div>
+<% end %>
+
+<script>
+  document.addEventListener("change", function(e) {
+    if (e.target.id === "source_type_select") {
+      document.getElementById("mk_sources").style.display = e.target.value === "mk" ? "block" : "none";
+    }
+    
+    if (e.target.id === "discount_type") {
+      document.getElementById("custom_discount_block").style.display = e.target.value === "other" ? "block" : "none";
+    }
+    
+    if (e.target.id === "photo_sold") {
+      document.getElementById("photo_payment_block").style.display = e.target.checked ? "block" : "none";
+    }
+  });
+
+  document.addEventListener("click", function(e) {
+    if (e.target.id === "btn_replace_actor") {
+      document.getElementById("replace_actor_block").style.display = "block";
+      e.target.style.display = "none";
+    }
+
+    if (e.target.id === "calc_btn") {
+      const basePrice = parseInt(e.target.getAttribute("data-base-price")) || 0;
+      const players = parseInt(document.getElementById("players_count").value) || 0;
+      let discount = 0;
+      const dType = document.getElementById("discount_type").value;
+      
+      if (dType === "other") {
+        discount = parseInt(document.getElementById("discount_custom").value) || 0;
+      } else if (dType !== "0" && dType !== "") {
+        discount = parseInt(dType) || 0;
+      }
+
+      let extraPlayersCost = 0;
+      if (players > 4) {
+        extraPlayersCost = (players - 4) * 1000;
+      }
+
+      let total = basePrice - discount + extraPlayersCost;
+      if (total < 0) {
+        total = 0;
+      }
+
+      document.getElementById("display_calc_amount").innerText = total;
+      document.getElementById("calculated_amount").value = total;
+      document.getElementById("actual_amount").value = total;
+      
+      document.getElementById("confirmation_block").style.display = "block";
+    }
+
+    if (e.target.id === "btn_match_yes") {
+      document.getElementById("mismatch_block").style.display = "none";
+      document.getElementById("submit_block").style.display = "block";
+    }
+
+    if (e.target.id === "btn_match_no") {
+      document.getElementById("mismatch_block").style.display = "block";
+      document.getElementById("submit_block").style.display = "block";
+    }
+  });
+</script>

@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  before_action :redirect_if_logged_in, only: [:new, :create]
+
   def new
   end
 
@@ -7,7 +9,7 @@ class SessionsController < ApplicationController
     
     if user && user.authenticate(params[:password])
       session[:user_id] = user.id
-      redirect_to root_path, notice: "Успешный вход!"
+      redirect_to dashboard_path, notice: "Успешный вход!"
     else
       flash.now[:alert] = "Неверный email или пароль"
       render :new, status: :unprocessable_entity

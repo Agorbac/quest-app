@@ -16,4 +16,10 @@ class ApplicationController < ActionController::Base
       redirect_to login_path, alert: "Пожалуйста, войдите в систему."
     end
   end
+
+  def redirect_if_logged_in
+    if logged_in?
+      redirect_to dashboard_path
+    end
+  end
 end

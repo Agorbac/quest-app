@@ -1,4 +1,6 @@
 class UsersController < ApplicationController
+  before_action :redirect_if_logged_in, only: [:new, :create]
+
   def new
     @user = User.new
   end
@@ -9,7 +11,7 @@ class UsersController < ApplicationController
 
     if @user.save
       session[:user_id] = @user.id 
-      redirect_to root_path, notice: "Вы успешно зарегистрировались!"
+      redirect_to dashboard_path, notice: "Вы успешно зарегистрировались!"
     else
       render :new, status: :unprocessable_entity
     end

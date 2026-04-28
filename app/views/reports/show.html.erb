@@ -1,0 +1,31 @@
+<h1>Отчет по игре</h1>
+
+<% if @report.blank_photo.attached? %>
+  <div style="margin-bottom: 20px;">
+    <%= image_tag @report.blank_photo, style: "max-width: 100%; border-radius: 8px;" %>
+  </div>
+<% end %>
+
+<div style="background: #e9ecef; padding: 20px; border-radius: 4px;">
+  <p><strong>Квест:</strong> <%= @game.quest_id %></p>
+  <p><strong>Дата и время:</strong> <%= @game.time.strftime("%d.%m.%Y в %H:%M") %></p>
+  <p><strong>Источник:</strong> <%= @report.source_type %> <%= @report.source_name %></p>
+  <p><strong>Актер:</strong> <%= @report.actual_actor ? @report.actual_actor.name : @game.user.name %></p>
+  <p><strong>Способ оплаты:</strong> <%= @report.payment_method %></p>
+  <p><strong>Игроков:</strong> <%= @report.players_count %></p>
+  <p><strong>Скидка:</strong> <%= @report.discount_type == 'other' ? @report.discount_custom : @report.discount_type %> руб.</p>
+  <p><strong>Фото:</strong> <%= @report.photo_sold ? "Да (#{@report.photo_payment})" : "Нет" %></p>
+  <p><strong>Доп. расходы:</strong> <%= @report.extra_expenses %> руб.</p>
+  <p><strong>Расчетная сумма:</strong> <%= @report.calculated_amount %> руб.</p>
+  <p><strong>Фактическая сумма:</strong> <%= @report.actual_amount %> руб.</p>
+  
+  <% if @report.amount_mismatch_reason.present? %>
+    <p><strong>Причина расхождения суммы:</strong> <%= @report.amount_mismatch_reason %></p>
+  <% end %>
+
+  <p><strong>Комментарий:</strong><br><%= @report.comment %></p>
+</div>
+
+<br>
+<%= link_to "Редактировать", edit_game_report_path(@game) %> | 
+<%= link_to "В личный кабинет", dashboard_path, data: { turbo: false } %>

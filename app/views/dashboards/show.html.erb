@@ -1,0 +1,275 @@
+<h1>Личный кабинет</h1>
+
+<p style="font-size: 18px;">
+  Ваш персональный номер (ID): <strong style="font-size: 24px; color: #2c3e50;"><%= @user.id %></strong>
+</p>
+<p>Ваша текущая роль: <strong><%= @user.role %></strong></p>
+
+<hr>
+
+<div style="margin-bottom: 30px; background: #f0f8ff; padding: 15px; border-radius: 8px; border: 1px solid #b8daff;">
+  <h2 style="margin-top: 0; color: #004085;">Мои личные бронирования</h2>
+  <%= link_to "Забронировать новую игру", new_game_path, data: { turbo: false }, style: "background: green; color: white; padding: 8px 12px; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 15px;" %>
+  
+  <% if @my_games.any? %>
+    <ul style="margin-bottom: 0;">
+      <% @my_games.each do |game| %>
+        <li>Квест <%= game.quest_id %> — <%= game.time.strftime("%d.%m.%Y в %H:%M") %> — <%= link_to "Детали", game_path(game), data: { turbo: false } %></li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p style="color: #666; margin-bottom: 0;">У вас пока нет запланированных игр.</p>
+  <% end %>
+</div>
+
+<% if @user.admin? || @user.actor? %>
+<div style="margin-bottom: 20px;">
+  <%= link_to "Таблица мотивации и премий", motivation_path, data: { turbo: false }, style: "background: #17a2b8; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;" %>
+</div>
+  <% if @user.admin? %>
+    <h2 style="color: red;">Панель управления Администратора</h2>
+    
+    <div style="margin-bottom: 20px;">
+      <%= link_to "Перейти к управлению актерами", staff_path, data: { turbo: false }, style: "background: purple; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;" %>
+    </div>
+
+    <div style="background: #f9f9f9; padding: 15px; margin-bottom: 20px; border: 1px solid #ccc; max-width: 500px;">
+      <h3 style="margin-top: 0;">Выдача прав доступа</h3>
+      <%= form_with url: update_role_path, method: :patch, local: true do |f| %>
+        <div style="margin-bottom: 10px;">
+          <%= f.label :user_id, "Введите ID пользователя:" %><br>
+          <%= f.number_field :user_id, required: true, style: "width: 100%;" %>
+        </div>
+        <div style="margin-bottom: 10px;">
+          <%= f.label :role, "Выберите новую роль:" %><br>
+          <%= f.select :role, [["Игрок (Сбросить права)", "player"], ["Актер", "actor"], ["Администратор", "admin"]], {}, style: "width: 100%;" %>
+        </div>
+        <div>
+          <%= f.submit "Назначить права", style: "background: blue; color: white; padding: 5px 10px; cursor: pointer;" %>
+        </div>
+      <% end %>
+    </div>
+<% else %>
+    <h2 style="color: purple;">Служебная панель Актера</h2>
+    
+    <div style="background: #fff3cd; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeeba; border-radius: 8px;">
+      <h3 style="margin-top: 0; color: #856404;">Мои игры на проведение</h3>
+      <% if @actor_booked_games.any? %>
+        <ul style="margin-bottom: 0; padding-left: 20px;">
+          <% @actor_booked_games.each do |game| %>
+            <li style="margin-bottom: 10px;">
+              <strong>Квест <%= game.quest_id %></strong> — <%= game.time.strftime("%d.%m.%Y в %H:%M") %>
+              
+              <% if game.time < Time.current %>
+                <span style="color: gray;">(Игра прошла)</span>
+                <% if game.report.present? %>
+                  —  <%= link_to "Посмотреть отчет", game_report_path(game), data: { turbo: false }, style: "color: green;" %>
+                <% else %>
+                  —  <strong>Нужен отчет!</strong> <%= link_to "Заполнить", new_game_report_path(game), data: { turbo: false }, style: "color: red; font-weight: bold;" %>
+                <% end %>
+              <% else %>
+                <span style="color: #155724;">(Предстоит)</span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p style="margin-bottom: 0;">В ваши смены пока нет забронированных игр.</p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <h3>Служебная сетка бронирований</h3>
+  
+  <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+    <%= link_to "Расписание на день", dashboard_path(view_mode: 'by_date'), data: { turbo: false }, style: "padding: 10px 20px; text-decoration: none; border-radius: 5px; background: #{@view_mode == 'by_date' ? '#2c3e50' : '#e9ecef'}; color: #{@view_mode == 'by_date' ? 'white' : 'black'};" %>
+    <%= link_to "Сетка по квестам", dashboard_path(view_mode: 'by_quest'), data: { turbo: false }, style: "padding: 10px 20px; text-decoration: none; border-radius: 5px; background: #{@view_mode == 'by_quest' ? '#2c3e50' : '#e9ecef'}; color: #{@view_mode == 'by_quest' ? 'white' : 'black'};" %>
+  </div>
+
+  <% if @view_mode == 'by_date' %>
+    <div style="margin-bottom: 20px; padding: 10px; background: #e9ecef; border-radius: 5px; display: inline-block;">
+      <%= link_to "← Пред. день", dashboard_path(view_mode: 'by_date', date: @selected_date - 1.day), data: { turbo: false }, style: "text-decoration: none; color: #0056b3;" %>
+      <strong style="margin: 0 20px; font-size: 18px;"><%= @selected_date.strftime("%d.%m.%Y") %></strong>
+      <%= link_to "След. день →", dashboard_path(view_mode: 'by_date', date: @selected_date + 1.day), data: { turbo: false }, style: "text-decoration: none; color: #0056b3;" %>
+    </div>
+
+    <div style="display: flex; gap: 50px;">
+      <div style="width: 200px;">
+        <h2 style="border-bottom: 2px solid black; padding-bottom: 5px;">Квест 1</h2>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <% @slots_quest_1.each do |time| %>
+            <% game = get_game_for_slot(1, time) %>
+            <% actors = get_actors_for_shift(1, time.to_date).join(", ") %>
+
+            <% if @user.admin? %>
+              <% if game && time < Time.current %>
+                <div style="background: #e2e3e5; color: #383d41; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #d6d8db; font-size: 14px;">
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Игра прошла<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span><br>
+                  <%= link_to "Подробнее", game_path(game), data: { turbo: false }, style: "color: #0056b3;" %>
+                </div>
+              <% elsif game && time >= Time.current %>
+                <div style="background: #f8d7da; color: #721c24; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #f5c6cb; font-size: 14px;">
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Занято<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span><br>
+                  <%= link_to "Управл.", game_path(game), data: { turbo: false }, style: "color: red;" %>
+                </div>
+              <% elsif !game && time < Time.current + 1.hour %>
+                <div style="background: #f1f3f5; color: #6c757d; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #dee2e6; text-decoration: line-through; font-size: 14px;">
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Прошло<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                </div>
+              <% else %>
+                <%= link_to new_game_path(quest_id: 1, time: time), data: { turbo: false }, style: "display: block; background: #d4edda; color: #155724; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #c3e6cb; text-decoration: none; font-size: 14px;" do %>
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Свободно<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                <% end %>
+              <% end %>
+            <% else %>
+              <% if time < Time.current + 1.hour %>
+                <div style="background: #f1f3f5; color: #6c757d; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #dee2e6; text-decoration: line-through; font-size: 14px;">
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Прошло<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                </div>
+              <% elsif game %>
+                <div style="background: #f8d7da; color: #721c24; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #f5c6cb; font-size: 14px;">
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Занято<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                </div>
+              <% else %>
+                <%= link_to new_game_path(quest_id: 1, time: time), data: { turbo: false }, style: "display: block; background: #d4edda; color: #155724; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #c3e6cb; text-decoration: none; font-size: 14px;" do %>
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Свободно<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <div style="width: 200px;">
+        <h2 style="border-bottom: 2px solid black; padding-bottom: 5px;">Квест 2</h2>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <% @slots_quest_2.each do |time| %>
+            <% game = get_game_for_slot(2, time) %>
+            <% actors = get_actors_for_shift(2, time.to_date).join(", ") %>
+
+            <% if @user.admin? %>
+              <% if game && time < Time.current %>
+                <div style="background: #e2e3e5; color: #383d41; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #d6d8db; font-size: 14px;">
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Игра прошла<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span><br>
+                  <%= link_to "Подробнее", game_path(game), data: { turbo: false }, style: "color: #0056b3;" %>
+                </div>
+              <% elsif game && time >= Time.current %>
+                <div style="background: #f8d7da; color: #721c24; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #f5c6cb; font-size: 14px;">
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Занято<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span><br>
+                  <%= link_to "Управл.", game_path(game), data: { turbo: false }, style: "color: red;" %>
+                </div>
+              <% elsif !game && time < Time.current + 1.hour %>
+                <div style="background: #f1f3f5; color: #6c757d; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #dee2e6; text-decoration: line-through; font-size: 14px;">
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Прошло<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                </div>
+              <% else %>
+                <%= link_to new_game_path(quest_id: 2, time: time), data: { turbo: false }, style: "display: block; background: #d4edda; color: #155724; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #c3e6cb; text-decoration: none; font-size: 14px;" do %>
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Свободно<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                <% end %>
+              <% end %>
+            <% else %>
+              <% if time < Time.current + 1.hour %>
+                <div style="background: #f1f3f5; color: #6c757d; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #dee2e6; text-decoration: line-through; font-size: 14px;">
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Прошло<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                </div>
+              <% elsif game %>
+                <div style="background: #f8d7da; color: #721c24; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #f5c6cb; font-size: 14px;">
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Занято<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                </div>
+              <% else %>
+                <%= link_to new_game_path(quest_id: 2, time: time), data: { turbo: false }, style: "display: block; background: #d4edda; color: #155724; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #c3e6cb; text-decoration: none; font-size: 14px;" do %>
+                  <strong><%= time.strftime("%H:%M") %></strong><br>Свободно<br>
+                  <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+  <% else %>
+    <div style="margin-bottom: 20px;">
+      <strong style="font-size: 18px;">Выберите квест:</strong>
+      <%= link_to "Квест 1", dashboard_path(view_mode: 'by_quest', quest_id: 1, start_date: @start_date), data: { turbo: false }, style: "margin-left: 15px; text-decoration: none; padding: 5px 10px; background: #{@selected_quest == 1 ? '#007bff' : '#eee'}; color: #{@selected_quest == 1 ? 'white' : 'black'}; border-radius: 3px;" %> 
+      <%= link_to "Квест 2", dashboard_path(view_mode: 'by_quest', quest_id: 2, start_date: @start_date), data: { turbo: false }, style: "margin-left: 5px; text-decoration: none; padding: 5px 10px; background: #{@selected_quest == 2 ? '#007bff' : '#eee'}; color: #{@selected_quest == 2 ? 'white' : 'black'}; border-radius: 3px;" %>
+    </div>
+
+    <div style="margin-bottom: 20px; padding: 10px; background: #e9ecef; border-radius: 5px; display: inline-block;">
+      <%= link_to "← Пред. дни", dashboard_path(view_mode: 'by_quest', quest_id: @selected_quest, start_date: @start_date - 7.days), data: { turbo: false }, style: "text-decoration: none; color: #0056b3;" %>
+      <strong style="margin: 0 20px; font-size: 18px;">Даты с <%= @start_date.strftime("%d.%m.%Y") %></strong>
+      <%= link_to "След. дни →", dashboard_path(view_mode: 'by_quest', quest_id: @selected_quest, start_date: @start_date + 7.days), data: { turbo: false }, style: "text-decoration: none; color: #0056b3;" %>
+    </div>
+
+    <div style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px;">
+      <% @weekly_slots.each do |date, slots| %>
+        <div style="min-width: 140px;">
+          <h3 style="text-align: center; border-bottom: 2px solid black; padding-bottom: 5px; margin-top: 0;"><%= date.strftime("%d.%m") %></h3>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <% slots.each do |time| %>
+              <% game = get_game_for_slot(@selected_quest, time) %>
+              <% actors = get_actors_for_shift(@selected_quest, time.to_date).join(", ") %>
+
+              <% if @user.admin? %>
+                <% if game && time < Time.current %>
+                  <div style="background: #e2e3e5; color: #383d41; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #d6d8db; font-size: 14px;">
+                    <strong><%= time.strftime("%H:%M") %></strong><br>Игра прошла<br>
+                    <span style="font-size: 11px; color: purple;"> <%= actors %></span><br>
+                    <%= link_to "Подробнее", game_path(game), data: { turbo: false }, style: "color: #0056b3;" %>
+                  </div>
+                <% elsif game && time >= Time.current %>
+                  <div style="background: #f8d7da; color: #721c24; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #f5c6cb; font-size: 14px;">
+                    <strong><%= time.strftime("%H:%M") %></strong><br>Занято<br>
+                    <span style="font-size: 11px; color: purple;"> <%= actors %></span><br>
+                    <%= link_to "Управл.", game_path(game), data: { turbo: false }, style: "color: red;" %>
+                  </div>
+                <% elsif !game && time < Time.current + 1.hour %>
+                  <div style="background: #f1f3f5; color: #6c757d; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #dee2e6; text-decoration: line-through; font-size: 14px;">
+                    <strong><%= time.strftime("%H:%M") %></strong><br>Прошло<br>
+                    <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                  </div>
+                <% else %>
+                  <%= link_to new_game_path(quest_id: @selected_quest, time: time), data: { turbo: false }, style: "display: block; background: #d4edda; color: #155724; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #c3e6cb; text-decoration: none; font-size: 14px;" do %>
+                    <strong><%= time.strftime("%H:%M") %></strong><br>Свободно<br>
+                    <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                  <% end %>
+                <% end %>
+              <% else %>
+                <% if time < Time.current + 1.hour %>
+                  <div style="background: #f1f3f5; color: #6c757d; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #dee2e6; text-decoration: line-through; font-size: 14px;">
+                    <strong><%= time.strftime("%H:%M") %></strong><br>Прошло<br>
+                    <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                  </div>
+                <% elsif game %>
+                  <div style="background: #f8d7da; color: #721c24; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #f5c6cb; font-size: 14px;">
+                    <strong><%= time.strftime("%H:%M") %></strong><br>Занято<br>
+                    <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                  </div>
+                <% else %>
+                  <%= link_to new_game_path(quest_id: @selected_quest, time: time), data: { turbo: false }, style: "display: block; background: #d4edda; color: #155724; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #c3e6cb; text-decoration: none; font-size: 14px;" do %>
+                    <strong><%= time.strftime("%H:%M") %></strong><br>Свободно<br>
+                    <span style="font-size: 11px; color: purple;"> <%= actors %></span>
+                  <% end %>
+                <% end %>
+              <% end %>
+              
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
