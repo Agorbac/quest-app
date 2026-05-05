@@ -1,6 +1,6 @@
 <h1>Детали игры</h1>
 
-<p><strong>Номер квеста:</strong> Квест <%= @game.quest_id %></p> 
+<p><strong>Название квеста:</strong> <%= @game.quest.name %></p> 
 <p><strong>Время игры:</strong> <%= @game.time.strftime("%d.%m.%Y в %H:%M") %></p>
 <p><strong>Дополнительная информация:</strong> <%= @game.info.present? ? @game.info : "Нет информации" %></p>
 

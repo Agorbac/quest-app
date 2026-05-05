@@ -8,15 +8,28 @@ class DashboardsController < ApplicationController
     @view_mode = params[:view_mode] || 'by_date'
     
     @my_games = @user.games.order(time: :desc)
+    @recommended_quests = @user.recommended_quests if @user.player?
 
     if @user.admin? || @user.actor?
       @selected_date = params[:date].present? ? Date.parse(params[:date]) : Date.today
       @selected_quest = params[:quest_id].present? ? params[:quest_id].to_i : 1
       @start_date = params[:start_date].present? ? Date.parse(params[:start_date]) : Date.today
 
+      if @user.admin?
+        @games_by_quest = Game.joins(:quest).where('time < ?', Time.current).group('quests.name').count
+        last_7_days = (6.days.ago.to_date..Date.today).to_a
+        @revenue_by_day = last_7_days.map do |date|
+          daily_revenue = Report.joins(:game).where(games: { time: date.beginning_of_day..date.end_of_day }).sum(:actual_amount)
+          [date.strftime("%d.%m"), daily_revenue]
+        end.to_h
+      end
+
       if @view_mode == 'by_date'
-        @slots_quest_1 = generate_slots(1, @selected_date)
-        @slots_quest_2 = generate_slots(2, @selected_date)
+        @quests = Quest.order(:id)
+        @daily_slots = {}
+        @quests.each do |q|
+          @daily_slots[q.id] = generate_slots(q.id, @selected_date)
+        end
       else
         @weekly_slots = {}
         (0..6).each do |i|
@@ -27,7 +40,7 @@ class DashboardsController < ApplicationController
 
       if @user.actor?
         my_schedules = @user.actor_schedules
-       @actor_booked_games = Game.includes(:report).select do |game|
+        @actor_booked_games = Game.includes(:report).select do |game|
           my_schedules.any? { |s| s.quest_id == game.quest_id && s.day_of_week == game.time.wday }
         end
         @actor_booked_games.sort_by! { |g| g.time }.reverse! 

@@ -1,128 +1,159 @@
 <% if @confirm_mode %>
-  <div style="max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 20px; border: 1px solid #ccc; border-radius: 8px;">
-    <h1 style="margin-top: 0;">Подтверждение брони</h1>
-    
-    <div style="font-size: 18px; margin-bottom: 20px;">
-      <p><strong>Квест:</strong> Квест <%= @game.quest_id %></p>
-      <p><strong>Дата и время:</strong> <%= @game.time.strftime("%d.%m.%Y в %H:%M") %></p>
-      <p><strong>Стоимость:</strong> <%= slot_price(@game.time) %> ₽</p>
+  <div class="card shadow-sm mx-auto mt-4" style="max-width: 500px;">
+    <div class="card-header bg-success text-white">
+      <h3 class="card-title mb-0">Подтверждение бронирования</h3>
     </div>
+    <div class="card-body">
+      <div class="mb-4">
+        <p class="mb-1"><strong>Квест:</strong> <%= @game.quest.name %></p>
+        <p class="mb-1"><strong>Дата и время:</strong> <%= @game.time.strftime("%d.%m.%Y в %H:%M") %></p>
+        <p class="mb-0 fs-5 text-success"><strong>Стоимость:</strong> <%= slot_price(@game.time) %> ₽</p>
+      </div>
 
-    <%= form_with model: @game, local: true do |f| %>
-      <%= f.hidden_field :quest_id %>
-      <%= f.hidden_field :time %>
-      
-      <div style="margin-bottom: 20px;">
-        <%= f.label :info, "Оставьте пожелания или комментарии (необязательно):", style: "display: block; margin-bottom: 5px;" %>
-        <%= f.text_area :info, rows: 4, style: "width: 100%; padding: 8px; box-sizing: border-box;" %>
-      </div>
-      
-      <div style="display: flex; gap: 10px;">
-        <%= f.submit "Забронировать", style: "background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold;" %>
-        <%= link_to "Отмена", new_game_path, style: "padding: 10px 20px; background: #ccc; color: black; text-decoration: none; border-radius: 4px; font-size: 16px;" %>
-      </div>
-    <% end %>
+      <%= form_with model: @game, local: true do |f| %>
+        <%= f.hidden_field :quest_id %>
+        <%= f.hidden_field :time %>
+        
+        <div class="mb-3">
+          <%= f.label :info, "Пожелания или комментарии (необязательно):", class: "form-label fw-bold" %>
+          <%= f.text_area :info, rows: 3, class: "form-control" %>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center">
+          <%= link_to "Назад", new_game_path, class: "btn btn-outline-secondary" %>
+          <%= f.submit "Забронировать", class: "btn btn-success fw-bold px-4" %>
+        </div>
+      <% end %>
+    </div>
   </div>
 
 <% else %>
-  <h1>Бронирование квеста</h1>
-
-  <div style="margin-bottom: 20px; display: flex; gap: 10px;">
-    <%= link_to "Расписание на день", new_game_path(view_mode: 'by_date'), data: { turbo: false }, style: "padding: 10px 20px; text-decoration: none; border-radius: 5px; background: #{@view_mode == 'by_date' ? '#2c3e50' : '#e9ecef'}; color: #{@view_mode == 'by_date' ? 'white' : 'black'};" %>
-    <%= link_to "Сетка по квестам", new_game_path(view_mode: 'by_quest'), data: { turbo: false }, style: "padding: 10px 20px; text-decoration: none; border-radius: 5px; background: #{@view_mode == 'by_quest' ? '#2c3e50' : '#e9ecef'}; color: #{@view_mode == 'by_quest' ? 'white' : 'black'};" %>
+  <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h1 class="h2 mb-0">Бронирование квестов</h1>
+    <%= link_to "Назад в кабинет", dashboard_path, class: "btn btn-outline-secondary btn-sm" %>
   </div>
 
-  <hr>
+  <ul class="nav nav-pills mb-4 justify-content-center">
+    <li class="nav-item">
+      <%= link_to "Расписание на день", new_game_path(view_mode: 'by_date'), data: { turbo: false }, class: "nav-link #{@view_mode == 'by_date' ? 'active bg-dark' : 'text-dark'}" %>
+    </li>
+    <li class="nav-item ms-2">
+      <%= link_to "Сетка по квестам", new_game_path(view_mode: 'by_quest'), data: { turbo: false }, class: "nav-link #{@view_mode == 'by_quest' ? 'active bg-dark' : 'text-dark'}" %>
+    </li>
+  </ul>
 
   <% if @view_mode == 'by_date' %>
-    <div style="margin-bottom: 20px; padding: 10px; background: #e9ecef; border-radius: 5px; display: inline-block;">
-      <%= link_to "← Пред. день", new_game_path(view_mode: 'by_date', date: @selected_date - 1.day), data: { turbo: false }, style: "text-decoration: none; color: #0056b3;" %>
-      <strong style="margin: 0 20px; font-size: 18px;"><%= @selected_date.strftime("%d.%m.%Y") %></strong>
-      <%= link_to "След. день →", new_game_path(view_mode: 'by_date', date: @selected_date + 1.day), data: { turbo: false }, style: "text-decoration: none; color: #0056b3;" %>
+    <div class="d-flex justify-content-center align-items-center mb-4 bg-white p-3 rounded shadow-sm">
+      <%= link_to "← Пред. день", new_game_path(view_mode: 'by_date', date: @selected_date - 1.day), data: { turbo: false }, class: "btn btn-outline-primary btn-sm" %>
+      <strong class="mx-4 fs-4"><%= @selected_date.strftime("%d.%m.%Y") %></strong>
+      <%= link_to "След. день →", new_game_path(view_mode: 'by_date', date: @selected_date + 1.day), data: { turbo: false }, class: "btn btn-outline-primary btn-sm" %>
     </div>
 
-    <div style="display: flex; gap: 50px;">
-      <div style="width: 200px;">
-        <h2 style="border-bottom: 2px solid black; padding-bottom: 5px;">Квест 1</h2>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <% @slots_quest_1.each do |time| %>
-            <% if time < Time.current + 1.hour %>
-              <div style="background: #f1f3f5; color: #6c757d; padding: 10px; text-align: center; border-radius: 4px; text-decoration: line-through;">
-                <%= time.strftime("%H:%M") %> — Прошло
-              </div>
-            <% elsif slot_booked?(1, time) %>
-              <div style="background: #e0e0e0; color: #666; padding: 10px; text-align: center; border-radius: 4px; text-decoration: line-through;">
-                <%= time.strftime("%H:%M") %> — Занято
-              </div>
-            <% else %>
-              <%= link_to new_game_path(quest_id: 1, time: time), data: { turbo: false }, style: "display: block; width: 100%; background: #d4edda; color: #155724; padding: 10px; border: 1px solid #c3e6cb; border-radius: 4px; text-decoration: none; text-align: center; box-sizing: border-box;" do %>
-                <strong><%= time.strftime("%H:%M") %></strong><br><%= slot_price(time) %> ₽
+    <div class="row flex-nowrap overflow-auto pb-3">
+      <% @quests.each do |quest| %>
+        <div class="col-auto" style="min-width: 200px;">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom-0 text-center pb-0">
+              <h5 class="card-title text-truncate mb-2" title="<%= quest.name %>"><%= quest.name %></h5>
+              <hr class="mt-0 mb-3 border-secondary">
+            </div>
+            <div class="card-body pt-0 d-flex flex-column gap-2">
+              <% @daily_slots[quest.id].each do |time| %>
+                <% if time < Time.current + 1.hour %>
+                  <div class="p-2 text-center bg-light text-muted rounded text-decoration-line-through small border">
+                    <%= time.strftime("%H:%M") %> <br> Прошло
+                  </div>
+                <% elsif slot_booked?(quest.id, time) %>
+                  <div class="p-2 text-center bg-secondary bg-opacity-25 text-secondary rounded text-decoration-line-through small border border-secondary border-opacity-25">
+                    <%= time.strftime("%H:%M") %> <br> Занято
+                  </div>
+                <% else %>
+                  <%= link_to new_game_path(quest_id: quest.id, time: time), data: { turbo: false }, class: "btn btn-outline-success p-2 w-100 text-center lh-sm" do %>
+                    <strong class="d-block"><%= time.strftime("%H:%M") %></strong>
+                    <span class="small"><%= slot_price(time) %> ₽</span>
+                  <% end %>
+                <% end %>
               <% end %>
-            <% end %>
-          <% end %>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div style="width: 200px;">
-        <h2 style="border-bottom: 2px solid black; padding-bottom: 5px;">Квест 2</h2>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <% @slots_quest_2.each do |time| %>
-            <% if time < Time.current + 1.hour %>
-              <div style="background: #f1f3f5; color: #6c757d; padding: 10px; text-align: center; border-radius: 4px; text-decoration: line-through;">
-                <%= time.strftime("%H:%M") %> — Прошло
-              </div>
-            <% elsif slot_booked?(2, time) %>
-              <div style="background: #e0e0e0; color: #666; padding: 10px; text-align: center; border-radius: 4px; text-decoration: line-through;">
-                <%= time.strftime("%H:%M") %> — Занято
-              </div>
-            <% else %>
-              <%= link_to new_game_path(quest_id: 2, time: time), data: { turbo: false }, style: "display: block; width: 100%; background: #d4edda; color: #155724; padding: 10px; border: 1px solid #c3e6cb; border-radius: 4px; text-decoration: none; text-align: center; box-sizing: border-box;" do %>
-                <strong><%= time.strftime("%H:%M") %></strong><br><%= slot_price(time) %> ₽
-              <% end %>
-            <% end %>
-          <% end %>
-        </div>
-      </div>
+      <% end %>
     </div>
 
   <% else %>
-    <div style="margin-bottom: 20px;">
-      <strong style="font-size: 18px;">Выберите квест:</strong>
-      <%= link_to "Квест 1", new_game_path(view_mode: 'by_quest', quest_id: 1, start_date: @start_date), data: { turbo: false }, style: "margin-left: 15px; text-decoration: none; padding: 5px 10px; background: #{@selected_quest == 1 ? '#007bff' : '#eee'}; color: #{@selected_quest == 1 ? 'white' : 'black'}; border-radius: 3px;" %> 
-      <%= link_to "Квест 2", new_game_path(view_mode: 'by_quest', quest_id: 2, start_date: @start_date), data: { turbo: false }, style: "margin-left: 5px; text-decoration: none; padding: 5px 10px; background: #{@selected_quest == 2 ? '#007bff' : '#eee'}; color: #{@selected_quest == 2 ? 'white' : 'black'}; border-radius: 3px;" %>
+    <% current_quest = Quest.find_by(id: @selected_quest) %>
+    
+    <div class="mb-4">
+      <div class="d-flex flex-wrap gap-2">
+        <% Quest.order(:id).each do |q| %>
+          <%= link_to q.name, new_game_path(view_mode: 'by_quest', quest_id: q.id, start_date: @start_date), data: { turbo: false }, class: "btn btn-sm #{@selected_quest == q.id ? 'btn-primary' : 'btn-outline-secondary'}" %> 
+        <% end %>
+      </div>
     </div>
 
-    <div style="margin-bottom: 20px; padding: 10px; background: #e9ecef; border-radius: 5px; display: inline-block;">
-      <%= link_to "← Пред. дни", new_game_path(view_mode: 'by_quest', quest_id: @selected_quest, start_date: @start_date - 7.days), data: { turbo: false }, style: "text-decoration: none; color: #0056b3;" %>
-      <strong style="margin: 0 20px; font-size: 18px;">Даты с <%= @start_date.strftime("%d.%m.%Y") %></strong>
-      <%= link_to "След. дни →", new_game_path(view_mode: 'by_quest', quest_id: @selected_quest, start_date: @start_date + 7.days), data: { turbo: false }, style: "text-decoration: none; color: #0056b3;" %>
+    <% if current_quest %>
+      <div class="card shadow-sm border-0 mb-4 bg-white">
+        <div class="card-body">
+          <h3 class="text-primary mb-3"><%= current_quest.name %></h3>
+          <p class="text-secondary mb-3"><%= current_quest.info %></p>
+          
+          <div class="mb-3">
+            <% current_quest.tags.each do |tag| %>
+              <span class="badge bg-info text-dark me-1 mb-1 fw-normal"><%= tag.name %></span>
+            <% end %>
+          </div>
+
+          <% similar = current_quest.similar_quests(2) %>
+          <% if similar.any? %>
+            <div class="mt-4 pt-3 border-top">
+              <span class="text-warning fw-bold d-block mb-2">🔥 Похожие квесты:</span>
+              <div class="d-flex gap-2">
+                <% similar.each do |sim_q| %>
+                  <%= link_to sim_q.name, new_game_path(view_mode: 'by_quest', quest_id: sim_q.id), data: { turbo: false }, class: "btn btn-outline-warning btn-sm fw-bold text-dark" %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="d-flex justify-content-center align-items-center mb-4 bg-white p-3 rounded shadow-sm">
+      <%= link_to "← Пред. дни", new_game_path(view_mode: 'by_quest', quest_id: @selected_quest, start_date: @start_date - 7.days), data: { turbo: false }, class: "btn btn-outline-primary btn-sm" %>
+      <strong class="mx-4 fs-5 d-none d-md-block">Даты с <%= @start_date.strftime("%d.%m.%Y") %></strong>
+      <strong class="mx-2 fs-6 d-md-none"><%= @start_date.strftime("%d.%m") %></strong>
+      <%= link_to "След. дни →", new_game_path(view_mode: 'by_quest', quest_id: @selected_quest, start_date: @start_date + 7.days), data: { turbo: false }, class: "btn btn-outline-primary btn-sm" %>
     </div>
 
-    <div style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px;">
+    <div class="row flex-nowrap overflow-auto pb-3">
       <% @weekly_slots.each do |date, slots| %>
-        <div style="min-width: 140px;">
-          <h3 style="text-align: center; border-bottom: 2px solid black; padding-bottom: 5px; margin-top: 0;"><%= date.strftime("%d.%m") %></h3>
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <% slots.each do |time| %>
-              <% if time < Time.current + 1.hour %>
-                <div style="background: #f1f3f5; color: #6c757d; padding: 10px; text-align: center; border-radius: 4px; text-decoration: line-through; font-size: 14px;">
-                  <%= time.strftime("%H:%M") %><br>Прошло
-                </div>
-              <% elsif slot_booked?(@selected_quest, time) %>
-                <div style="background: #e0e0e0; color: #666; padding: 10px; text-align: center; border-radius: 4px; text-decoration: line-through; font-size: 14px;">
-                  <%= time.strftime("%H:%M") %><br>Занято
-                </div>
-              <% else %>
-                <%= link_to new_game_path(quest_id: @selected_quest, time: time), data: { turbo: false }, style: "display: block; width: 100%; background: #d4edda; color: #155724; padding: 10px; border: 1px solid #c3e6cb; border-radius: 4px; text-decoration: none; text-align: center; font-size: 14px; box-sizing: border-box;" do %>
-                  <strong><%= time.strftime("%H:%M") %></strong><br><%= slot_price(time) %> ₽
+        <div class="col-auto" style="min-width: 140px;">
+          <div class="card h-100 border-0 shadow-sm bg-white">
+            <div class="card-header bg-transparent border-bottom-0 text-center pb-0">
+              <h5 class="mb-2"><%= date.strftime("%d.%m") %></h5>
+              <hr class="mt-0 border-secondary">
+            </div>
+            <div class="card-body pt-0 d-flex flex-column gap-2">
+              <% slots.each do |time| %>
+                <% if time < Time.current + 1.hour %>
+                  <div class="p-2 text-center bg-light text-muted rounded text-decoration-line-through small border">
+                    <%= time.strftime("%H:%M") %><br>Прошло
+                  </div>
+                <% elsif slot_booked?(@selected_quest, time) %>
+                  <div class="p-2 text-center bg-secondary bg-opacity-25 text-secondary rounded text-decoration-line-through small border border-secondary border-opacity-25">
+                    <%= time.strftime("%H:%M") %><br>Занято
+                  </div>
+                <% else %>
+                  <%= link_to new_game_path(quest_id: @selected_quest, time: time), data: { turbo: false }, class: "btn btn-outline-success p-2 w-100 text-center lh-sm" do %>
+                    <strong class="d-block"><%= time.strftime("%H:%M") %></strong>
+                    <span class="small"><%= slot_price(time) %> ₽</span>
+                  <% end %>
                 <% end %>
               <% end %>
-            <% end %>
+            </div>
           </div>
         </div>
       <% end %>
     </div>
   <% end %>
-  <br><br>
-  <%= link_to "Назад в личный кабинет", dashboard_path, data: { turbo: false } %>
 <% end %>

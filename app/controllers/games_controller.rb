@@ -27,10 +27,18 @@ class GamesController < ApplicationController
 
       if @view_mode == 'by_date'
         @selected_date = params[:date].present? ? Date.parse(params[:date]) : Date.today
-        @slots_quest_1 = generate_slots(1, @selected_date)
-        @slots_quest_2 = generate_slots(2, @selected_date)
+        @quests = Quest.order(:id)
+        @daily_slots = {}
+        @quests.each do |q|
+          @daily_slots[q.id] = generate_slots(q.id, @selected_date)
+        end
       else
         @selected_quest = params[:quest_id].present? ? params[:quest_id].to_i : 1
+        if logged_in?
+          view = current_user.quest_views.find_or_initialize_by(quest_id: @selected_quest)
+          view.touch unless view.new_record? # Обновляем время, если уже смотрел
+          view.save if view.new_record?      # Создаем новую запись, если смотрит впервые
+        end
         @start_date = params[:start_date].present? ? Date.parse(params[:start_date]) : Date.today
         
         @weekly_slots = {}

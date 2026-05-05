@@ -10,6 +10,8 @@ Rails.application.routes.draw do
   
   get "up" => "rails/health#show", as: :rails_health_check
   get "staff", to: "staff#index", as: "staff"
+  get "monthly_report", to: "staff#monthly_report", as: "monthly_report"
+
   get "dashboard", to: "dashboards#show", as: "dashboard"
   patch "update_role", to: "dashboards#update_role", as: "update_role"
   

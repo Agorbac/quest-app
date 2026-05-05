@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_28_230725) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_05_211848) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -75,6 +75,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_230725) do
     t.index ["user_id"], name: "index_games_on_user_id"
   end
 
+  create_table "quest_tags", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "quest_id", null: false
+    t.bigint "tag_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["quest_id", "tag_id"], name: "index_quest_tags_on_quest_id_and_tag_id", unique: true
+    t.index ["quest_id"], name: "index_quest_tags_on_quest_id"
+    t.index ["tag_id"], name: "index_quest_tags_on_tag_id"
+  end
+
+  create_table "quest_views", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "quest_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["quest_id"], name: "index_quest_views_on_quest_id"
+    t.index ["user_id"], name: "index_quest_views_on_user_id"
+  end
+
   create_table "quests", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "info"
@@ -103,6 +122,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_230725) do
     t.index ["game_id"], name: "index_reports_on_game_id"
   end
 
+  create_table "tags", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_tags_on_name", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email"
@@ -122,6 +148,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_230725) do
   add_foreign_key "actor_transactions", "users"
   add_foreign_key "games", "quests"
   add_foreign_key "games", "users"
+  add_foreign_key "quest_tags", "quests"
+  add_foreign_key "quest_tags", "tags"
+  add_foreign_key "quest_views", "quests"
+  add_foreign_key "quest_views", "users"
   add_foreign_key "reports", "games"
   add_foreign_key "reports", "users", column: "actual_actor_id"
 end
